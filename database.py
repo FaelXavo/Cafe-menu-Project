@@ -19,19 +19,18 @@ c.execute('''
 ''')
 c.execute('''
     CREATE TABLE IF NOT EXISTS orders (
-        id INTEGER PRIMARY KEY NOT NULL,
-        item_id INT NOT NULL,
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        item_name TEXT,
         quantity INTEGER,
-        date TEXT,
         total_value INTEGER
     )
 ''')
 c.execute('''
     CREATE TABLE IF NOT EXISTS orders_history (
-    id INTEGER PRIMARY AUTOINCREMENT KEY NOT NULL,
-    date TEXT,
-    items TEXT,
-    total INTEGER
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        date TEXT,
+        items TEXT,
+        total INTEGER
     )
 ''')
 c.execute('''
@@ -44,10 +43,11 @@ c.execute('''
 ''')
 
 #testing area --------------------------
-name = 'smth'
-price = 1200
+name = 'test5'
+price = 2
 category = 'drink'
 
+#new_order(4, 2)
 #insert_item(name, price, category)
 #edit_price(new_price = 10000, name = name)
 #delete_item(name)
