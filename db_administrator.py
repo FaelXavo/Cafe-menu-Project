@@ -22,10 +22,19 @@ def delete_item(name):
 
 #FUNCTIONS TO CALCULATE
 def calculate_amount(item, quantity):
-    return item * quantity
+    return int(item * quantity)
 
 #FUNCTIONS TO MANIPULATE ORDERS
-def new_order(item_id, quantity, total_value):
-    c.execute("INSERT INTO orders (id, item_id, quantity, total_value), VALUES (?, ?, ?, ?)",
-              (item_id, quantity, total_value))
+def new_order(item_id, quantity):
+    c.execute("SELECT price FROM items WHERE id = ?", (item_id,))
+    price = c.fetchone()[0]
+    c.execute("SELECT name FROM items WHERE id = ?", (item_id,))
+    name = c.fetchone()[0]
+    c.execute("INSERT INTO orders (item_name, quantity, total_value) VALUES (?, ?, ?)",
+              (name, quantity, calculate_amount(price, quantity)))
+    conn.commit()
+
+def finish_order(oder_id):
+    c.execute("INSERT INTO history (date, items, total),"
+              "date = ? , SELECT group_concat(item_name), sum(total_value) FROM orders")
     conn.commit()
