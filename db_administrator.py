@@ -1,5 +1,6 @@
 #This file is going to have the administrator for the databank
 import _sqlite3
+import datetime
 
 conn = _sqlite3.connect('cafe_data.db')
 c = conn.cursor()
@@ -34,7 +35,10 @@ def new_order(item_id, quantity):
               (name, quantity, calculate_amount(price, quantity)))
     conn.commit()
 
-def finish_order(oder_id):
-    c.execute("INSERT INTO history (date, items, total),"
-              "date = ? , SELECT group_concat(item_name), sum(total_value) FROM orders")
+def finish_order():
+    c.execute("BEGIN")
+    c.execute('''INSERT INTO orders_history (date, items, total)
+              SELECT ?, group_concat(item_name), sum(total_value) FROM orders''',
+              (datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S'),))
+    c.execute ('DELETE FROM orders')
     conn.commit()
