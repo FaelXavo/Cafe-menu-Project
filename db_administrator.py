@@ -27,18 +27,27 @@ def calculate_amount(item, quantity):
 
 #FUNCTIONS TO MANIPULATE ORDERS
 def new_order(item_id, quantity):
-    c.execute("SELECT price FROM items WHERE id = ?", (item_id,))
-    price = c.fetchone()[0]
-    c.execute("SELECT name FROM items WHERE id = ?", (item_id,))
-    name = c.fetchone()[0]
-    c.execute("INSERT INTO orders (item_name, quantity, total_value) VALUES (?, ?, ?)",
-              (name, quantity, calculate_amount(price, quantity)))
-    conn.commit()
+    if quantity <= 0:
+        raise ValueError("The amount of items must be positive")
+    c.execute("SELECT name, price FROM items WHERE id = ?", (item_id,))
+    row = c.fetchone()
+    if row is None:
+        raise ValueError("Item not found")
+
+    name, price = row
+    total = calculate_amount(price, quantity)
+    with conn:
+        c.execute("INSERT INTO orders (item_name, quantity, total_value) "
+                  "VALUES (?, ?, ?)",
+                  (name, quantity, total))
+
 
 def finish_order():
-    c.execute("BEGIN")
-    c.execute('''INSERT INTO orders_history (date, items, total)
-              SELECT ?, group_concat(item_name), sum(total_value) FROM orders''',
-              (datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S'),))
-    c.execute ('DELETE FROM orders')
-    conn.commit()
+    try:
+        with conn:
+            c.execute('''INSERT INTO orders_history (date, items, total)
+                      SELECT ?, group_concat(item_name), sum(total_value) FROM orders''',
+                      (datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S'),))
+            c.execute ('DELETE FROM orders')
+    except _sqlite3.Error as e:
+        print(f"Error to finish the purchase: {e}")
