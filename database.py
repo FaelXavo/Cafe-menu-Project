@@ -6,7 +6,7 @@ from db_administrator import *
 # history: id, date, items, total
 # statistics: date, daily_total, monthly_total
 
-conn = _sqlite3.connect('cafe_data.db')
+conn = _sqlite3.connect('cafe_data.db', timeout=10)
 
 c = conn.cursor()
 c.execute('''
@@ -18,11 +18,20 @@ c.execute('''
     )
 ''')
 c.execute('''
-    CREATE TABLE IF NOT EXISTS orders (
+    CREATE TABLE IF NOT EXISTS order_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        order_id INTEGER,
         item_name TEXT,
         quantity INTEGER,
-        total_value INTEGER
+        total_value INTEGER,
+    )
+''')
+c.execute('''
+    CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        date TEXT NOT NULL,
+        table_number INTEGER,
+        status TEXT DEFAULT 'open'
     )
 ''')
 c.execute('''
@@ -48,6 +57,7 @@ price = 2
 category = 'drink'
 
 #new_order(4, 2)
+#finish_order()
 #insert_item(name, price, category)
 #edit_price(new_price = 10000, name = name)
 #delete_item(name)
